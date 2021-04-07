@@ -7,14 +7,16 @@ import 'package:testing_geojson/data/name3.dart';
 import 'package:testing_geojson/data/name4.dart';
 import 'package:testing_geojson/models/building_model.dart';
 
+import 'heatMap.dart';
+
 /// 4d Structures - Buildings
-final buildingProvider =
-    Provider.family<List<Structure>, String>((ref, filter) {
+final buildingProvider = Provider<List<Structure>>((ref) {
+  final filter = ref.watch(filterProvider).state;
   List<Structure> buildings = [];
 
   if (filter != null && filter != '') {
     for (int i = 0; i < namesBuild.length; i++) {
-      if (namesBuild.contains(filter)) {
+      if (namesBuild[i].toLowerCase().contains(filter.toLowerCase())) {
         buildings.add(Structure(
           name: namesBuild[i],
           centroid: buildingCenters[i],
@@ -34,13 +36,26 @@ final buildingProvider =
 
 /// 4d Structures - non Buildings
 final structure4dProvider = Provider<List<Structure>>((ref) {
+  final filter = ref.watch(filterProvider).state;
   List<Structure> structures4D = [];
 
-  for (int i = 0; i < names4D.length; i++) {
-    structures4D.add(Structure(
-      name: names4D[i],
-      centroid: centers4D[i],
-    ));
+  if (filter != null && filter != '') {
+    for (int i = 0; i < names4D.length; i++) {
+      if (names4D[i].toLowerCase().contains(filter.toLowerCase())) {
+        structures4D.add(Structure(
+          name: names4D[i],
+          centroid: centers4D[i],
+        ));
+      } else
+        print(names4D[i]);
+    }
+  } else {
+    for (int i = 0; i < names4D.length; i++) {
+      structures4D.add(Structure(
+        name: names4D[i],
+        centroid: centers4D[i],
+      ));
+    }
   }
 
   return structures4D;
@@ -48,13 +63,25 @@ final structure4dProvider = Provider<List<Structure>>((ref) {
 
 /// 3d Structures
 final streetsProvider = Provider<List<Street>>((ref) {
+  final filter = ref.watch(filterProvider).state;
   List<Street> structures3D = [];
 
-  for (int i = 0; i < names3D.length; i++) {
-    structures3D.add(Street(
-      name: names3D[i],
-      coordinates: coord3D[i][0],
-    ));
+  if (filter != null && filter != '') {
+    for (int i = 0; i < names3D.length; i++) {
+      if (names3D[i].toLowerCase().contains(filter.toLowerCase())) {
+        structures3D.add(Street(
+          name: names3D[i],
+          coordinates: coord3D[i][0],
+        ));
+      }
+    }
+  } else {
+    for (int i = 0; i < names3D.length; i++) {
+      structures3D.add(Street(
+        name: names3D[i],
+        coordinates: coord3D[i][0],
+      ));
+    }
   }
 
   return structures3D;

@@ -11,7 +11,7 @@ import 'package:testing_geojson/updated/updated_custom_map.dart';
 
 final showBuildingMarkerProvider = StateProvider<bool>((ref) => false);
 final showStructureMarkerProvider = StateProvider<bool>((ref) => false);
-final showLinesMarkerProvider = StateProvider<bool>((ref) => false);
+//final showLinesMarkerProvider = StateProvider<bool>((ref) => false);
 final showSearchBarProvider = StateProvider<bool>((ref) => false);
 final filterProvider = StateProvider<String>((ref) => '');
 
@@ -22,7 +22,7 @@ class Heatmap extends ConsumerWidget {
     Size screenSize,
     bool showBuildingsMarker,
     bool showStructuresMarker,
-    bool showLinesMarker,
+//    bool showLinesMarker,
     bool showSearchBar,
     List<Structure> buildings,
     List<Structure> structures4d,
@@ -68,10 +68,7 @@ class Heatmap extends ConsumerWidget {
 
     /// Toggle showing structures markers
     if (showStructuresMarker) {
-      for (int i = 0; i < buildings.length; i++) {
-        if (i == 0 || i == 3) continue;
-
-        ///
+      for (int i = 0; i < structures4d.length; i++) {
         var offsetCorrected = [
           structures4d[i].centroid.first + screenSize.width / 2 - 5,
           structures4d[i].centroid.last + screenSize.height / 1.2 - 10
@@ -91,7 +88,7 @@ class Heatmap extends ConsumerWidget {
     }
 
     /// Toggle showing structures markers
-    if (showLinesMarker) {
+    if (showStructuresMarker) {
       for (int i = 0; i < streets.length; i++) {
         ///
         var offsetCorrected = [
@@ -104,23 +101,13 @@ class Heatmap extends ConsumerWidget {
             child: Tooltip(
               message: streets[i].name,
               child: Icon(
-                FontAwesomeIcons.road,
+                FontAwesomeIcons.mapMarkerAlt,
                 color: Colors.lightBlue.withOpacity(0.7),
                 size: 10,
               ),
             )));
       }
     }
-
-//    if (showSearchBar) {
-//      list.add(CustomSearchBar(
-//        callback: (String value) {
-////          setState(() {
-////            filter = value;
-////          });
-//        },
-//      ));
-//    }
 
     return list;
   }
@@ -129,16 +116,17 @@ class Heatmap extends ConsumerWidget {
   Widget build(BuildContext context, ScopedReader watch) {
     final showBuildingMarker = watch(showBuildingMarkerProvider).state;
     final showStructureMarker = watch(showStructureMarkerProvider).state;
-    final showLinesMarker = watch(showLinesMarkerProvider).state;
+//    final showLinesMarker = watch(showLinesMarkerProvider).state;
     final showSearchBar = watch(showSearchBarProvider).state;
     var filter = watch(filterProvider).state;
 
-    final buildings = watch(buildingProvider(filter));
+    final buildings = watch(buildingProvider);
     final structures4d = watch(structure4dProvider);
     final streets = watch(streetsProvider);
 
     final Size screenSize = MediaQuery.of(context).size;
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
         body: Stack(children: [
           InteractiveViewer(
@@ -149,21 +137,20 @@ class Heatmap extends ConsumerWidget {
               screenSize,
               showBuildingMarker,
               showStructureMarker,
-              showLinesMarker,
+//              showLinesMarker,
               showSearchBar,
               buildings,
               structures4d,
               streets,
-            )..add((showSearchBar)
-                    ? (CustomSearchBar(
-                        callback: (String value) {
-//          setState(() {
-                          filter = value;
-//          });
-                        },
-                      ))
-                    : SizedBox())),
+            )),
           ),
+          if (showSearchBar)
+            CustomSearchBar(
+              callback: (String value) {
+                context.read(filterProvider).state = value;
+                print('filter: $filter');
+              },
+            ),
           Positioned(
               top: screenSize.height / 2,
               left: 20,
@@ -206,15 +193,15 @@ class Heatmap extends ConsumerWidget {
                           context.read(showStructureMarkerProvider).state =
                               !context.read(showStructureMarkerProvider).state;
                         }),
-                    IconButton(
-                        icon: Icon(FontAwesomeIcons.road,
-                            color: showLinesMarker
-                                ? Theme.of(context).accentColor
-                                : Colors.white),
-                        onPressed: () {
-                          context.read(showLinesMarkerProvider).state =
-                              !context.read(showLinesMarkerProvider).state;
-                        }),
+//                    IconButton(
+//                        icon: Icon(FontAwesomeIcons.road,
+//                            color: showLinesMarker
+//                                ? Theme.of(context).accentColor
+//                                : Colors.white),
+//                        onPressed: () {
+//                          context.read(showLinesMarkerProvider).state =
+//                              !context.read(showLinesMarkerProvider).state;
+//                        }),
                     IconButton(
                         icon: Icon(FontAwesomeIcons.infoCircle,
                             color: Colors.white),
